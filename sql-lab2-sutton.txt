@@ -1,0 +1,63 @@
+use CSC_457;
+
+-- make the vehicle table 
+create table "Vehicle"(
+VehicleType nvarchar(20),
+Year int, 
+Make nvarchar(20),
+Model nvarchar(20),
+Condition nvarchar(20),
+VehicleKey int IDENTITY(1,1) NOT NULL,
+Primary key(VehicleKey, VehicleType));
+--VehicleKey char(9) primary key);
+
+-- Accident location zipcode cap 99999
+create table "Acc_Location"(
+City nvarchar(20),
+Zipcode int check (Zipcode < 99999),
+StreetName nvarchar(25),
+LocationKey int IDENTITY(1,1) NOT NULL,
+Primary key(LocationKey, City));
+
+-- Time dimension with obvious parameters 
+create table "Time_Date"(
+Year int,
+Month int check (Month <= 12),
+Day int check (Day <= 31),
+TimeOfDay time,
+TimeKey int IDENTITY(1,1) NOT NULL,
+Primary key(TimeKey, Year));
+
+-- Weather table which also ties road conditions
+create table "Weather"(
+WeatherType nvarchar(20),
+RoadCondiiton nvarchar(20),
+Duration int,
+AreaAffected nvarchar(30),
+Severity int,
+WeatherKey int IDENTITY(1,1) NOT NULL,
+Primary key(WeatherKey, WeatherType));
+
+-- Fact table here with every key required, also matching the size of the buffer from above tables
+create table "Account_fact"(
+VT nvarchar(20) not null,
+VK int not null,
+City nvarchar(20),
+LK int,
+Year int,
+TK int,
+WT nvarchar(20),
+WK int,
+EmergencyResponse nvarchar(30),
+TrafficDensity nvarchar(20),
+Visibility int check (Visibility <= 100),
+Damage nvarchar(30));
+--change the primary keys to be the dual keys
+alter table "Account_fact" add constraint fk_acc_Vehicle foreign key (VK, VT) references "Vehicle" (VehicleKey, VehicleType);
+alter table "Account_fact" add constraint fk_acc_Location foreign key (LK, City) references "Acc_Location" (LocationKey, City);
+alter table "Account_fact" add constraint fk_acc_Time_Date foreign key (TK, Year) references "Time_Date" (TimeKey, Year);
+alter table "Account_fact" add constraint fk_acc_Weather foreign key (WK, WT) references "Weather" (WeatherKey, WeatherType);
+
+
+
+
